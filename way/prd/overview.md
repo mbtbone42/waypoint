@@ -93,17 +93,20 @@ program_milestones:            # optional; trackless bars rendered above all tra
     start: 2017-09-01
     end: 2018-02-28
     status: on-track
+    notes: "Core platform stability and feature completion"
 
 milestones:                    # optional; vertical date lines
   - date: 2017-12-15
     label: "Code Freeze"
     type: freeze               # optional; maps to CSS class for styling
+    notes: "All features must be merged by EOD"
   - date: 2018-01-15
     label: "GA Release"
     type: release
 
 tracks:
   - name: "User"
+    notes: "End-user facing components: API, CLI, and UI"
     lanes:
       - name: "API & CLI"
         items:
@@ -223,6 +226,7 @@ Program milestones are high-level, trackless milestone bars that represent progr
 | `actual.start` | date | no | Actual start date |
 | `actual.end` | date | no | Actual end date |
 | `moved_to` | date | no | New end date if moved out |
+| `notes` | string | no | Tooltip text shown on hover (e.g., phase objectives or context) |
 
 ### Item Schema Detail
 
@@ -248,6 +252,14 @@ Each item within a lane:
 | `completed` | Black (#222222) overlaid on gray | Black | Black bar from actual.start to actual.end. If no actual dates, uses plan dates |
 | `moved-out` | Green then Red (#CC0000) overlaid on gray | Red | Green bar up to original plan.end, red bar from plan.end to moved_to, then gray to new plan.end |
 
+### Track Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | yes | Display name shown in the track gutter |
+| `notes` | string | no | Tooltip text shown on hover (e.g., expanded name, scope description) |
+| `lanes` | array | yes | List of lanes within this track |
+
 ### Lane Behavior
 
 - Items within a lane may overlap or be sequential — the YAML defines their positions
@@ -256,9 +268,17 @@ Each item within a lane:
 
 ### Milestones
 
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `date` | date | yes | The date this milestone marks |
+| `label` | string | yes | Display name shown at the top of the chart |
+| `type` | string | no | CSS class for styling (e.g., `freeze`, `release`, `deadline`) |
+| `notes` | string | no | Tooltip text shown on hover (e.g., what the milestone means, deadlines) |
+
 - Rendered as vertical dashed or solid lines spanning the full chart height
-- Label rendered at top or bottom, rotated or horizontal depending on space
+- Label rendered above the header, centered on the line
 - "Today" is a special milestone: auto-generated from system date, rendered as a distinct style (e.g., teal/blue dashed line), unless explicitly defined in the milestones array
+- Hovering a milestone label shows the exact date and notes
 
 ---
 
@@ -325,7 +345,10 @@ All colors are defined in the style CSS file (see `atlas-style.css` for defaults
 
 ### Hover
 
-- Hovering an item bar shows a tooltip with: label, plan dates, actual dates (if any), status, and notes (if any)
+- **Items**: Hovering an item bar shows a tooltip with: label, plan dates, actual dates (if any), status, and notes (if any)
+- **Tracks**: Hovering a track label shows the track name and notes (if any), providing expanded context for abbreviated names
+- **Program milestones**: Hovering a program milestone bar shows the label, date range, status, and notes (if any)
+- **Milestones**: Hovering a milestone label shows the label, exact date, and notes (if any)
 
 ### PNG Export
 

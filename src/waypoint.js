@@ -109,14 +109,17 @@ export function buildSchedule(dataObj, viewObj) {
       status: validateStatus(pm.status),
       actual: pm.actual ? { start: toDate(pm.actual.start), end: toDate(pm.actual.end) } : null,
       movedTo: pm.moved_to ? toDate(pm.moved_to) : null,
+      notes: pm.notes || null,
     })),
     milestones: (dataObj.milestones || []).map(m => ({
       date: toDate(m.date),
       label: m.label,
       type: m.type || null,
+      notes: m.notes || null,
     })),
     tracks: filteredTracks.map(t => ({
       name: t.name,
+      notes: t.notes || null,
       lanes: (t.lanes || []).map(l => ({
         name: l.name,
         items: (l.items || []).map(item => ({
@@ -411,6 +414,18 @@ function renderTrackChrome(svg, trackLayout, C) {
   });
   label.textContent = track.name;
   svg.appendChild(label);
+
+  // Track tooltip hit area (over the gutter)
+  const hitArea = svgEl('rect', {
+    x: 4, y: trackY,
+    width: C.GUTTER_WIDTH - 8, height: trackHeight,
+    fill: 'transparent', class: 'hit-area',
+  });
+  hitArea.style.cursor = 'pointer';
+  const tooltipLines = [track.name];
+  if (track.notes) tooltipLines.push(track.notes);
+  attachTooltipLines(hitArea, tooltipLines);
+  svg.appendChild(hitArea);
 }
 
 function renderTrackBars(svg, trackLayout, schedule, layout, C, pass) {
@@ -583,6 +598,21 @@ function renderProgramBar(svg, item, barY, schedule, layout, C) {
   labelEl.textContent = item.label;
   group.appendChild(labelEl);
 
+  // Tooltip hit area
+  const hitArea = svgEl('rect', {
+    x: x1, y: barY - 12, width: Math.max(x2 - x1, 20), height: C.PROGRAM_MS_HEIGHT,
+    fill: 'transparent', class: 'hit-area',
+  });
+  hitArea.style.cursor = 'pointer';
+  const lines = [
+    item.label,
+    `${formatDate(item.start)} \u2192 ${formatDate(item.end)}`,
+    `Status: ${status}`,
+  ];
+  if (item.notes) lines.push(item.notes);
+  attachTooltipLines(hitArea, lines);
+  group.appendChild(hitArea);
+
   svg.appendChild(group);
 }
 
@@ -616,6 +646,15 @@ function renderTodayLine(svg, schedule, layout, C) {
   });
   label.textContent = 'Today';
   svg.appendChild(label);
+
+  // Tooltip hit area
+  const hitArea = svgEl('rect', {
+    x: x - 25, y: topY - 16, width: 50, height: 16,
+    fill: 'transparent', class: 'hit-area',
+  });
+  hitArea.style.cursor = 'pointer';
+  attachTooltipLines(hitArea, ['Today', formatDate(today)]);
+  svg.appendChild(hitArea);
 }
 
 function renderMilestoneLines(svg, schedule, layout, C) {
@@ -643,6 +682,17 @@ function renderMilestoneLines(svg, schedule, layout, C) {
     });
     label.textContent = ms.label;
     svg.appendChild(label);
+
+    // Tooltip hit area over the label
+    const hitArea = svgEl('rect', {
+      x: x - 40, y: topY - 16, width: 80, height: 16,
+      fill: 'transparent', class: 'hit-area',
+    });
+    hitArea.style.cursor = 'pointer';
+    const lines = [ms.label, formatDate(ms.date)];
+    if (ms.notes) lines.push(ms.notes);
+    attachTooltipLines(hitArea, lines);
+    svg.appendChild(hitArea);
   }
 }
 
@@ -689,27 +739,27 @@ function renderLegend(svg, schedule, layout, C) {
 // ============================================================
 
 function attachTooltip(element, item) {
+  const lines = [
+    item.label,
+    `Plan: ${formatDate(item.plan.start)} \u2192 ${formatDate(item.plan.end)}`,
+    `Status: ${item.status}`,
+  ];
+  if (item.actual) {
+    lines.push(`Actual: ${formatDate(item.actual.start)} \u2192 ${formatDate(item.actual.end)}`);
+  }
+  if (item.movedTo) {
+    lines.push(`Moved to: ${formatDate(item.movedTo)}`);
+  }
+  if (item.notes) {
+    lines.push(item.notes);
+  }
+  attachTooltipLines(element, lines);
+}
+
+function attachTooltipLines(element, lines) {
   let tooltipGroup = null;
 
   element.addEventListener('mouseenter', (e) => {
-    const planStart = item.plan ? item.plan.start : item.start;
-    const planEnd = item.plan ? item.plan.end : item.end;
-
-    const lines = [
-      item.label,
-      `Plan: ${formatDate(planStart)} \u2192 ${formatDate(planEnd)}`,
-      `Status: ${item.status}`,
-    ];
-    if (item.actual) {
-      lines.push(`Actual: ${formatDate(item.actual.start)} \u2192 ${formatDate(item.actual.end)}`);
-    }
-    if (item.movedTo) {
-      lines.push(`Moved to: ${formatDate(item.movedTo)}`);
-    }
-    if (item.notes) {
-      lines.push(item.notes);
-    }
-
     tooltipGroup = svgEl('g', { class: 'tooltip' });
 
     const lineHeight = 16;
@@ -719,6 +769,9 @@ function attachTooltip(element, item) {
 
     let tx = parseFloat(element.getAttribute('x') || 0);
     let ty = parseFloat(element.getAttribute('y') || 0) - height - 4;
+
+    // Clamp tooltip so it doesn't go above the SVG
+    if (ty < 2) ty = parseFloat(element.getAttribute('y') || 0) + parseFloat(element.getAttribute('height') || 20) + 4;
 
     tooltipGroup.appendChild(svgEl('rect', {
       x: tx, y: ty, width: maxWidth, height: height,

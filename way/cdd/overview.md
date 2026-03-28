@@ -120,14 +120,16 @@ export function render(schedule, container)      // → SVGElement; builds SVG f
   },
   programMilestones: [
     { label: string, start: Date, end: Date, status: string,
-      actual: { start: Date, end: Date } | null }
+      actual: { start: Date, end: Date } | null,
+      notes: string | null }
   ],
   milestones: [
-    { date: Date, label: string, type: string | null }
+    { date: Date, label: string, type: string | null, notes: string | null }
   ],
   tracks: [
     {
       name: string,
+      notes: string | null,
       lanes: [
         {
           name: string,
@@ -340,7 +342,18 @@ text.setAttribute("transform", `rotate(-90, ${x}, ${y})`);
 
 ### Tooltip
 
-On hover, a tooltip `<g>` is shown near the cursor with a rounded-rect background and text lines showing label, dates, status, and notes. The tooltip is appended to the SVG and removed on mouseout.
+On hover, a tooltip `<g>` is shown near the hovered element with a rounded-rect background and text lines. The tooltip is appended to the SVG and removed on mouseout.
+
+Tooltips are universal — every visual object supports them:
+
+| Object | Tooltip Content |
+|--------|----------------|
+| Item bar | Label, plan dates, actual dates, status, notes |
+| Track label | Track name, notes |
+| Program milestone | Label, date range, status, notes |
+| Milestone label | Label, exact date (YYYY-MM-DD), notes |
+
+All objects use the `notes` field from the data YAML. Tooltips only render content that exists — if there's no notes field, that line is omitted. If an object has no hover-worthy content beyond its label, the tooltip is still useful for confirming the exact element under the cursor.
 
 ---
 

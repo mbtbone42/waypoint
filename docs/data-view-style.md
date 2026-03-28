@@ -45,14 +45,17 @@ program_milestones:          # Optional. High-level phase bars above all tracks.
     start: 2026-03-01
     end: 2026-08-31
     status: on-track
+    notes: "Core platform stability and feature completion"
 
 milestones:                  # Optional. Vertical date lines.
   - date: 2026-06-15
     label: "Feature Freeze"
     type: freeze             # Optional. Maps to a CSS class for styling.
+    notes: "All features must be merged by EOD"
 
 tracks:
   - name: "User"
+    notes: "End-user facing components: API, CLI, and web UI"
     lanes:
       - name: "API"
         items:
@@ -88,6 +91,15 @@ tracks:
 | `completed` | Done | Black overlay on gray |
 | `moved-out` | Slipped past original plan date | Green then red extension on gray |
 
+### Notes (All Objects)
+
+All visual objects support an optional `notes` field. Notes appear in hover tooltips, providing context without cluttering the chart. Use notes for:
+
+- **Tracks**: Expanded name or scope description (e.g., "Cloud platform, CI/CD, monitoring, and security compliance")
+- **Items**: Why something slipped, what's blocking, or other context
+- **Program milestones**: Phase objectives or success criteria
+- **Milestones**: What the milestone means, deadlines, or actions required
+
 ### Milestone Types
 
 Milestone `type` values map to CSS classes. The default style includes:
@@ -117,6 +129,7 @@ program_milestones:
     start: 2026-03-01
     end: 2026-08-31
     status: on-track
+    notes: "Feature completion, stability, and partner onboarding"
 ```
 
 ---
@@ -272,7 +285,7 @@ If you are an AI agent generating Waypoint YAML, follow these rules:
 5. **`actual` dates are only for `completed` items.** If status is `completed` and you know the real dates, include `actual.start` and `actual.end`.
 6. **`moved_to` is only for `moved-out` items.** It's the new end date the work slipped to.
 7. **Track names must be unique.** Lane names should be unique within a track.
-8. **Use `notes` for context.** Example: `notes: "Blocked by vendor API migration"`.
+8. **Use `notes` for context on any object.** Items: `notes: "Blocked by vendor API migration"`. Tracks: `notes: "Cloud, CI/CD, monitoring"`. Milestones: `notes: "All features must be merged by EOD"`. Program milestones: `notes: "Core stability and partner onboarding"`.
 
 ### View File Rules
 

@@ -223,28 +223,35 @@ program_milestones:
     actual:
       start: 2025-12-01
       end: 2026-03-10
+    notes: "Initial platform foundation and core API"
   - label: "Beta"
     start: 2026-03-01
     end: 2026-08-31
     status: on-track
+    notes: "Feature completion, stability, and partner onboarding"
   - label: "GA"
     start: 2026-09-01
     end: 2027-01-31
     status: planned
+    notes: "General availability launch and post-launch support"
 
 milestones:
   - date: 2026-06-15
     label: "Feature Freeze"
     type: freeze
+    notes: "All new features must be merged by EOD"
   - date: 2026-09-01
     label: "Code Freeze"
     type: freeze
+    notes: "Only critical bug fixes after this date"
   - date: 2026-10-15
     label: "GA Release"
     type: release
+    notes: "Public launch to all customers"
 
 tracks:
   - name: "User"
+    notes: "End-user facing components: API, CLI, web UI, and authentication"
     lanes:
       - name: "API & CLI"
         items:
@@ -295,6 +302,7 @@ tracks:
             status: planned
 
   - name: "Features"
+    notes: "Product features: search, integrations, analytics, and notifications"
     lanes:
       - name: "Core Features"
         items:
@@ -339,6 +347,7 @@ tracks:
             status: planned
 
   - name: "Systems"
+    notes: "Backend services, data layer, and performance engineering"
     lanes:
       - name: "Backend"
         items:
@@ -384,6 +393,7 @@ tracks:
             status: planned
 
   - name: "Infrastructure"
+    notes: "Cloud platform, CI/CD, monitoring, and security compliance"
     lanes:
       - name: "Cloud"
         items:
