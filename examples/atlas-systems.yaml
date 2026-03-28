@@ -1,0 +1,19 @@
+# atlas-systems.yaml — Systems deep-dive view
+# Zooms into the Systems track only
+
+title: "Project Atlas — Systems Deep Dive"
+
+data: atlas-data.yaml
+style: atlas-style.css
+
+timeline:
+  start: 2025-12-01
+  end: 2027-01-31
+  today: 2026-03-27
+  granularity: month
+
+tracks:
+  - "Systems"
+
+show_program_milestones: false
+show_legend: true

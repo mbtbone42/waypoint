@@ -1,0 +1,18 @@
+# atlas-board.yaml — Board-level view of Project Atlas
+# Shows all tracks for executive overview
+
+title: "Project Atlas — Engineering Schedule"
+
+data: atlas-data.yaml
+style: atlas-style.css
+
+timeline:
+  start: 2025-12-01
+  end: 2027-01-31
+  today: 2026-03-27
+  granularity: month
+
+tracks: all
+
+show_program_milestones: true
+show_legend: true

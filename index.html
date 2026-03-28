@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waypoint — Schedule Visualization</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    #waypoint-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1400px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    #waypoint-container {
+      width: 100%;
+    }
+    #waypoint-container svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #F8F8F8;
+      border-bottom: 1px solid #E8E8E8;
+      flex-wrap: wrap;
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toolbar-spacer {
+      flex: 1;
+    }
+    .toolbar label {
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: #F0F0F0;
+      border: 1px solid #DDD;
+      border-radius: 4px;
+    }
+    .toolbar label:hover {
+      background: #E8E8E8;
+      color: #333;
+    }
+    .toolbar input[type="file"] {
+      display: none;
+    }
+    .export-btn {
+      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+      font-size: 12px;
+      color: #666;
+      background: #F0F0F0;
+      border: 1px solid #DDD;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+    .export-btn:hover {
+      background: #E8E8E8;
+      color: #333;
+    }
+    .show-all-btn {
+      font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+      font-size: 12px;
+      color: #666;
+      background: #F0F0F0;
+      border: 1px solid #DDD;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+      display: none;
+    }
+    .show-all-btn:hover {
+      background: #E8E8E8;
+      color: #333;
+    }
+    #drop-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(46, 139, 46, 0.08);
+      border: 3px dashed #2E8B2E;
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      color: #2E8B2E;
+      font-weight: 500;
+    }
+  </style>
+
+  <!-- Embedded default style (for file:// support) -->
+  <style id="default-style">
+.waypoint {
+  --color-plan: #C8C8C8;
+  --color-completed: #222222;
+  --color-on-track: #2E8B2E;
+  --color-moved-out: #CC3333;
+  --color-plan-diamond: #AAAAAA;
+  --color-completed-diamond: #000000;
+  --color-on-track-diamond: #1B7A1B;
+  --color-moved-out-diamond: #CC0000;
+  --color-today: #008B8B;
+  --color-milestone: #555555;
+  --color-milestone-freeze: #0066cc;
+  --color-milestone-release: #2E8B2E;
+  --color-milestone-deadline: #CC3333;
+  --color-track-bg: #F0F5F0;
+  --color-track-border: #D0D8D0;
+  --color-track-text: #333333;
+  --color-bg: #FFFFFF;
+  --color-header-bg: #F5F7F5;
+  --color-header-border: #D0D8D0;
+  --color-grid-line: #EEEEEE;
+  --font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-size-title: 18px;
+  --font-size-header: 12px;
+  --font-size-label: 11px;
+  --font-size-track: 13px;
+  --font-size-legend: 11px;
+  --bar-height: 5px;
+  --bar-radius: 1px;
+  --diamond-size: 15px;
+  --lane-spacing: 22px;
+  --track-padding: 10px;
+  --track-gap: 12px;
+  --gutter-width: 55px;
+  --header-height: 30px;
+  --program-milestone-height: 24px;
+  --bar-stroke-width: 0;
+  --today-stroke-width: 1.5px;
+  --milestone-stroke-width: 1px;
+  --track-border-width: 1px;
+}
+.header-bg { fill: var(--color-header-bg); stroke: var(--color-header-border); stroke-width: 1px; }
+.header-text { font-family: var(--font-family); font-size: var(--font-size-header); font-weight: 600; fill: #555555; }
+.header-divider { stroke: var(--color-header-border); stroke-width: 1px; }
+.grid-line { stroke: var(--color-grid-line); stroke-width: 0.5px; }
+.chart-title { font-family: var(--font-family); font-size: var(--font-size-title); font-weight: 600; fill: #222222; }
+.track-bg { fill: var(--color-track-bg); stroke: var(--color-track-border); stroke-width: var(--track-border-width); rx: 6px; ry: 6px; }
+.track-label { font-family: var(--font-family); font-size: var(--font-size-track); font-weight: 500; fill: var(--color-track-text); }
+.bar.plan { fill: var(--color-plan); rx: var(--bar-radius); ry: var(--bar-radius); }
+.diamond.plan { fill: var(--color-plan-diamond); }
+.bar.completed { fill: var(--color-completed); rx: var(--bar-radius); ry: var(--bar-radius); }
+.diamond.completed { fill: var(--color-completed-diamond); }
+.bar.on-track { fill: var(--color-on-track); rx: var(--bar-radius); ry: var(--bar-radius); }
+.diamond.on-track { fill: var(--color-on-track-diamond); }
+.bar.moved-out { fill: var(--color-moved-out); rx: var(--bar-radius); ry: var(--bar-radius); }
+.diamond.moved-out { fill: var(--color-moved-out-diamond); }
+.bar-label { font-family: var(--font-family); font-size: var(--font-size-label); font-weight: 500; fill: #333333; }
+.program-milestone-label { font-family: var(--font-family); font-size: var(--font-size-label); font-weight: 500; fill: #333333; }
+.today-line { stroke: var(--color-today); stroke-width: var(--today-stroke-width); stroke-dasharray: 6, 4; }
+.today-label { font-family: var(--font-family); font-size: 10px; fill: var(--color-today); }
+.milestone-line { stroke: var(--color-milestone); stroke-width: var(--milestone-stroke-width); stroke-dasharray: 4, 3; }
+.milestone-line.freeze { stroke: var(--color-milestone-freeze); }
+.milestone-line.release { stroke: var(--color-milestone-release); }
+.milestone-line.deadline { stroke: var(--color-milestone-deadline); }
+.milestone-label { font-family: var(--font-family); font-size: 10px; fill: var(--color-milestone); }
+.milestone-label.freeze { fill: var(--color-milestone-freeze); }
+.milestone-label.release { fill: var(--color-milestone-release); }
+.milestone-label.deadline { fill: var(--color-milestone-deadline); }
+.legend-text { font-family: var(--font-family); font-size: var(--font-size-legend); fill: #555555; }
+.legend-bar.plan { fill: var(--color-plan); }
+.legend-bar.completed { fill: var(--color-completed); }
+.legend-bar.on-track { fill: var(--color-on-track); }
+.legend-bar.moved-out { fill: var(--color-moved-out); }
+.legend-diamond.plan { fill: var(--color-plan-diamond); }
+.legend-diamond.completed { fill: var(--color-completed-diamond); }
+.legend-diamond.on-track { fill: var(--color-on-track-diamond); }
+.legend-diamond.moved-out { fill: var(--color-moved-out-diamond); }
+.tooltip-bg { fill: #333333; rx: 4px; ry: 4px; opacity: 0.95; }
+.tooltip-text { font-family: var(--font-family); font-size: 11px; fill: #FFFFFF; }
+  </style>
+</head>
+<body>
+
+  <div id="drop-overlay">Drop YAML or CSS files here</div>
+
+  <div id="waypoint-wrapper">
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <label>Load Data <input type="file" id="file-data" accept=".yaml,.yml"></label>
+        <label>Load View <input type="file" id="file-view" accept=".yaml,.yml"></label>
+        <label>Load Style <input type="file" id="file-style" accept=".css"></label>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <button class="show-all-btn" id="show-all-btn">Show All Tracks</button>
+      <button class="export-btn" id="export-btn">Export PNG</button>
+    </div>
+    <div id="waypoint-container"></div>
+  </div>
+
+  <!-- Embedded default data (for file:// support) -->
+  <script id="default-data" type="text/yaml">
+program_milestones:
+  - label: "Alpha"
+    start: 2025-12-01
+    end: 2026-03-15
+    status: completed
+    actual:
+      start: 2025-12-01
+      end: 2026-03-10
+  - label: "Beta"
+    start: 2026-03-01
+    end: 2026-08-31
+    status: on-track
+  - label: "GA"
+    start: 2026-09-01
+    end: 2027-01-31
+    status: planned
+
+milestones:
+  - date: 2026-06-15
+    label: "Feature Freeze"
+    type: freeze
+  - date: 2026-09-01
+    label: "Code Freeze"
+    type: freeze
+  - date: 2026-10-15
+    label: "GA Release"
+    type: release
+
+tracks:
+  - name: "User"
+    lanes:
+      - name: "API & CLI"
+        items:
+          - label: "API v1"
+            plan:
+              start: 2025-12-01
+              end: 2026-03-01
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-02-15
+          - label: "API v2"
+            plan:
+              start: 2026-04-01
+              end: 2026-08-01
+            status: on-track
+          - label: "CLI Tools"
+            plan:
+              start: 2026-08-01
+              end: 2026-11-15
+            status: planned
+      - name: "UI"
+        items:
+          - label: "UI Prototype"
+            plan:
+              start: 2026-01-15
+              end: 2026-04-15
+            status: completed
+            actual:
+              start: 2026-01-15
+              end: 2026-04-01
+          - label: "UI Production"
+            plan:
+              start: 2026-04-15
+              end: 2026-09-01
+            status: on-track
+      - name: "Auth"
+        items:
+          - label: "Authentication"
+            plan:
+              start: 2026-03-01
+              end: 2026-07-01
+            status: on-track
+          - label: "Authorization"
+            plan:
+              start: 2026-07-01
+              end: 2026-10-15
+            status: planned
+
+  - name: "Features"
+    lanes:
+      - name: "Core Features"
+        items:
+          - label: "Search"
+            plan:
+              start: 2025-12-15
+              end: 2026-05-01
+            status: on-track
+          - label: "Notifications"
+            plan:
+              start: 2026-05-01
+              end: 2026-08-15
+            status: planned
+      - name: "Integrations"
+        items:
+          - label: "Slack Integration"
+            plan:
+              start: 2026-02-01
+              end: 2026-05-15
+            status: moved-out
+            actual:
+              start: 2026-02-01
+              end: 2026-04-01
+            moved_to: 2026-07-01
+            notes: "Blocked by Slack API v3 migration"
+          - label: "GitHub Integration"
+            plan:
+              start: 2026-05-15
+              end: 2026-09-01
+            status: planned
+      - name: "Analytics"
+        items:
+          - label: "Dashboards"
+            plan:
+              start: 2026-03-01
+              end: 2026-07-15
+            status: on-track
+          - label: "Reporting"
+            plan:
+              start: 2026-07-15
+              end: 2026-11-01
+            status: planned
+
+  - name: "Systems"
+    lanes:
+      - name: "Backend"
+        items:
+          - label: "Core Services"
+            plan:
+              start: 2025-12-01
+              end: 2026-04-15
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-04-10
+          - label: "Event System"
+            plan:
+              start: 2026-04-01
+              end: 2026-07-15
+            status: on-track
+      - name: "Data"
+        items:
+          - label: "Database Migration"
+            plan:
+              start: 2026-01-15
+              end: 2026-04-01
+            status: completed
+            actual:
+              start: 2026-01-15
+              end: 2026-03-20
+          - label: "Data Pipeline"
+            plan:
+              start: 2026-04-01
+              end: 2026-08-15
+            status: on-track
+      - name: "Performance"
+        items:
+          - label: "Caching Layer"
+            plan:
+              start: 2026-05-01
+              end: 2026-08-01
+            status: planned
+          - label: "Load Testing"
+            plan:
+              start: 2026-08-01
+              end: 2026-10-01
+            status: planned
+
+  - name: "Infrastructure"
+    lanes:
+      - name: "Cloud"
+        items:
+          - label: "AWS Setup"
+            plan:
+              start: 2025-12-01
+              end: 2026-02-15
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-02-10
+          - label: "Multi-Region"
+            plan:
+              start: 2026-06-01
+              end: 2026-10-01
+            status: planned
+      - name: "CI/CD"
+        items:
+          - label: "Build Pipeline"
+            plan:
+              start: 2026-01-01
+              end: 2026-03-15
+            status: completed
+            actual:
+              start: 2026-01-01
+              end: 2026-03-01
+          - label: "Deploy Pipeline"
+            plan:
+              start: 2026-03-01
+              end: 2026-05-15
+            status: on-track
+      - name: "Monitoring"
+        items:
+          - label: "Observability"
+            plan:
+              start: 2026-02-15
+              end: 2026-06-01
+            status: on-track
+          - label: "Alerting"
+            plan:
+              start: 2026-06-01
+              end: 2026-08-15
+            status: planned
+      - name: "Security"
+        items:
+          - label: "Compliance Audit"
+            plan:
+              start: 2026-04-01
+              end: 2026-06-15
+            status: moved-out
+            actual:
+              start: 2026-04-01
+              end: 2026-05-01
+            moved_to: 2026-08-01
+            notes: "Delayed pending SOC 2 auditor availability"
+          - label: "Pen Testing"
+            plan:
+              start: 2026-09-01
+              end: 2026-11-15
+            status: planned
+  </script>
+
+  <!-- Embedded default view (for file:// support) -->
+  <script id="default-view" type="text/yaml">
+title: "Project Atlas — Engineering Schedule"
+data: examples/atlas-data.yaml
+style: examples/atlas-style.css
+timeline:
+  start: 2025-12-01
+  end: 2027-01-31
+  today: 2026-03-27
+  granularity: month
+tracks: all
+show_program_milestones: true
+show_legend: true
+  </script>
+
+  <script type="module">
+    import { init } from './src/waypoint.js';
+
+    const container = document.getElementById('waypoint-container');
+    init(container);
+
+    // Drag-and-drop overlay
+    let dragCounter = 0;
+    const overlay = document.getElementById('drop-overlay');
+
+    document.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dragCounter++;
+      overlay.style.display = 'flex';
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      dragCounter--;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        overlay.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('drop', (e) => {
+      dragCounter = 0;
+      overlay.style.display = 'none';
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

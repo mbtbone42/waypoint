@@ -1,0 +1,232 @@
+# atlas-data.yaml — Project Atlas schedule source of truth
+# Timeline: December 2025 through January 2027 (14 months)
+
+program_milestones:
+  - label: "Alpha"
+    start: 2025-12-01
+    end: 2026-03-15
+    status: completed
+    actual:
+      start: 2025-12-01
+      end: 2026-03-10
+  - label: "Beta"
+    start: 2026-03-01
+    end: 2026-08-31
+    status: on-track
+  - label: "GA"
+    start: 2026-09-01
+    end: 2027-01-31
+    status: planned
+
+milestones:
+  - date: 2026-06-15
+    label: "Feature Freeze"
+    type: freeze
+  - date: 2026-09-01
+    label: "Code Freeze"
+    type: freeze
+  - date: 2026-10-15
+    label: "GA Release"
+    type: release
+
+tracks:
+  - name: "User"
+    lanes:
+      - name: "API & CLI"
+        items:
+          - label: "API v1"
+            plan:
+              start: 2025-12-01
+              end: 2026-03-01
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-02-15
+          - label: "API v2"
+            plan:
+              start: 2026-04-01
+              end: 2026-08-01
+            status: on-track
+          - label: "CLI Tools"
+            plan:
+              start: 2026-08-01
+              end: 2026-11-15
+            status: planned
+      - name: "UI"
+        items:
+          - label: "UI Prototype"
+            plan:
+              start: 2026-01-15
+              end: 2026-04-15
+            status: completed
+            actual:
+              start: 2026-01-15
+              end: 2026-04-01
+          - label: "UI Production"
+            plan:
+              start: 2026-04-15
+              end: 2026-09-01
+            status: on-track
+      - name: "Auth"
+        items:
+          - label: "Authentication"
+            plan:
+              start: 2026-03-01
+              end: 2026-07-01
+            status: on-track
+          - label: "Authorization"
+            plan:
+              start: 2026-07-01
+              end: 2026-10-15
+            status: planned
+
+  - name: "Features"
+    lanes:
+      - name: "Core Features"
+        items:
+          - label: "Search"
+            plan:
+              start: 2025-12-15
+              end: 2026-05-01
+            status: on-track
+          - label: "Notifications"
+            plan:
+              start: 2026-05-01
+              end: 2026-08-15
+            status: planned
+      - name: "Integrations"
+        items:
+          - label: "Slack Integration"
+            plan:
+              start: 2026-02-01
+              end: 2026-05-15
+            status: moved-out
+            actual:
+              start: 2026-02-01
+              end: 2026-04-01
+            moved_to: 2026-07-01
+            notes: "Blocked by Slack API v3 migration"
+          - label: "GitHub Integration"
+            plan:
+              start: 2026-05-15
+              end: 2026-09-01
+            status: planned
+      - name: "Analytics"
+        items:
+          - label: "Dashboards"
+            plan:
+              start: 2026-03-01
+              end: 2026-07-15
+            status: on-track
+          - label: "Reporting"
+            plan:
+              start: 2026-07-15
+              end: 2026-11-01
+            status: planned
+
+  - name: "Systems"
+    lanes:
+      - name: "Backend"
+        items:
+          - label: "Core Services"
+            plan:
+              start: 2025-12-01
+              end: 2026-04-15
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-04-10
+          - label: "Event System"
+            plan:
+              start: 2026-04-01
+              end: 2026-07-15
+            status: on-track
+      - name: "Data"
+        items:
+          - label: "Database Migration"
+            plan:
+              start: 2026-01-15
+              end: 2026-04-01
+            status: completed
+            actual:
+              start: 2026-01-15
+              end: 2026-03-20
+          - label: "Data Pipeline"
+            plan:
+              start: 2026-04-01
+              end: 2026-08-15
+            status: on-track
+      - name: "Performance"
+        items:
+          - label: "Caching Layer"
+            plan:
+              start: 2026-05-01
+              end: 2026-08-01
+            status: planned
+          - label: "Load Testing"
+            plan:
+              start: 2026-08-01
+              end: 2026-10-01
+            status: planned
+
+  - name: "Infrastructure"
+    lanes:
+      - name: "Cloud"
+        items:
+          - label: "AWS Setup"
+            plan:
+              start: 2025-12-01
+              end: 2026-02-15
+            status: completed
+            actual:
+              start: 2025-12-01
+              end: 2026-02-10
+          - label: "Multi-Region"
+            plan:
+              start: 2026-06-01
+              end: 2026-10-01
+            status: planned
+      - name: "CI/CD"
+        items:
+          - label: "Build Pipeline"
+            plan:
+              start: 2026-01-01
+              end: 2026-03-15
+            status: completed
+            actual:
+              start: 2026-01-01
+              end: 2026-03-01
+          - label: "Deploy Pipeline"
+            plan:
+              start: 2026-03-01
+              end: 2026-05-15
+            status: on-track
+      - name: "Monitoring"
+        items:
+          - label: "Observability"
+            plan:
+              start: 2026-02-15
+              end: 2026-06-01
+            status: on-track
+          - label: "Alerting"
+            plan:
+              start: 2026-06-01
+              end: 2026-08-15
+            status: planned
+      - name: "Security"
+        items:
+          - label: "Compliance Audit"
+            plan:
+              start: 2026-04-01
+              end: 2026-06-15
+            status: moved-out
+            actual:
+              start: 2026-04-01
+              end: 2026-05-01
+            moved_to: 2026-08-01
+            notes: "Delayed pending SOC 2 auditor availability"
+          - label: "Pen Testing"
+            plan:
+              start: 2026-09-01
+              end: 2026-11-15
+            status: planned

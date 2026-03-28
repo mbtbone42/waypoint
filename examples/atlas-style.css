@@ -1,0 +1,335 @@
+/*
+ * atlas-style.css — Waypoint default style
+ *
+ * This file controls the visual appearance of Waypoint timelines.
+ * Edit the custom properties below to theme the chart.
+ * Swap this file for a different look without touching data or view files.
+ */
+
+/* ============================================================
+   Custom Properties (edit these for quick theming)
+   ============================================================ */
+
+.waypoint {
+  /* Status colors — bars */
+  --color-plan: #C8C8C8;
+  --color-completed: #222222;
+  --color-on-track: #2E8B2E;
+  --color-moved-out: #CC3333;
+
+  /* Status colors — diamonds */
+  --color-plan-diamond: #AAAAAA;
+  --color-completed-diamond: #000000;
+  --color-on-track-diamond: #1B7A1B;
+  --color-moved-out-diamond: #CC0000;
+
+  /* Timeline markers */
+  --color-today: #008B8B;
+  --color-milestone: #555555;
+  --color-milestone-freeze: #0066cc;
+  --color-milestone-release: #2E8B2E;
+  --color-milestone-deadline: #CC3333;
+
+  /* Track labels */
+  --color-track-bg: #F0F5F0;
+  --color-track-border: #D0D8D0;
+  --color-track-text: #333333;
+
+  /* Background and chrome */
+  --color-bg: #FFFFFF;
+  --color-header-bg: #F5F7F5;
+  --color-header-border: #D0D8D0;
+  --color-grid-line: #EEEEEE;
+
+  /* Typography */
+  --font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-size-title: 18px;
+  --font-size-header: 12px;
+  --font-size-label: 11px;
+  --font-size-track: 13px;
+  --font-size-legend: 11px;
+
+  /* Dimensions */
+  --bar-height: 5px;
+  --bar-radius: 1px;
+  --diamond-size: 15px;
+  --lane-spacing: 22px;
+  --track-padding: 10px;
+  --track-gap: 12px;
+  --gutter-width: 55px;
+  --header-height: 30px;
+  --program-milestone-height: 24px;
+
+  /* Stroke widths */
+  --bar-stroke-width: 0;
+  --today-stroke-width: 1.5px;
+  --milestone-stroke-width: 1px;
+  --track-border-width: 1px;
+}
+
+/* ============================================================
+   Chart Background
+   ============================================================ */
+
+.waypoint {
+  background: var(--color-bg);
+}
+
+/* ============================================================
+   Timeline Header
+   ============================================================ */
+
+.header-bg {
+  fill: var(--color-header-bg);
+  stroke: var(--color-header-border);
+  stroke-width: 1px;
+}
+
+.header-text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-header);
+  font-weight: 600;
+  fill: #555555;
+}
+
+.header-divider {
+  stroke: var(--color-header-border);
+  stroke-width: 1px;
+}
+
+/* ============================================================
+   Grid Lines (vertical month boundaries)
+   ============================================================ */
+
+.grid-line {
+  stroke: var(--color-grid-line);
+  stroke-width: 0.5px;
+}
+
+/* ============================================================
+   Title
+   ============================================================ */
+
+.chart-title {
+  font-family: var(--font-family);
+  font-size: var(--font-size-title);
+  font-weight: 600;
+  fill: #222222;
+}
+
+/* ============================================================
+   Track Labels
+   ============================================================ */
+
+.track-bg {
+  fill: var(--color-track-bg);
+  stroke: var(--color-track-border);
+  stroke-width: var(--track-border-width);
+  rx: 6px;
+  ry: 6px;
+}
+
+.track-label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-track);
+  font-weight: 500;
+  fill: var(--color-track-text);
+}
+
+/* ============================================================
+   Bars — Plan (base layer)
+   ============================================================ */
+
+.bar.plan {
+  fill: var(--color-plan);
+  stroke-width: var(--bar-stroke-width);
+  rx: var(--bar-radius);
+  ry: var(--bar-radius);
+}
+
+.diamond.plan {
+  fill: var(--color-plan-diamond);
+}
+
+/* ============================================================
+   Bars — Completed
+   ============================================================ */
+
+.bar.completed {
+  fill: var(--color-completed);
+  stroke-width: var(--bar-stroke-width);
+  rx: var(--bar-radius);
+  ry: var(--bar-radius);
+}
+
+.diamond.completed {
+  fill: var(--color-completed-diamond);
+}
+
+/* ============================================================
+   Bars — On Track
+   ============================================================ */
+
+.bar.on-track {
+  fill: var(--color-on-track);
+  stroke-width: var(--bar-stroke-width);
+  rx: var(--bar-radius);
+  ry: var(--bar-radius);
+}
+
+.diamond.on-track {
+  fill: var(--color-on-track-diamond);
+}
+
+/* ============================================================
+   Bars — Moved Out
+   ============================================================ */
+
+.bar.moved-out {
+  fill: var(--color-moved-out);
+  stroke-width: var(--bar-stroke-width);
+  rx: var(--bar-radius);
+  ry: var(--bar-radius);
+}
+
+.diamond.moved-out {
+  fill: var(--color-moved-out-diamond);
+}
+
+/* ============================================================
+   Item Labels
+   ============================================================ */
+
+.bar-label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-label);
+  font-weight: 500;
+  fill: #333333;
+}
+
+/* ============================================================
+   Today Line
+   ============================================================ */
+
+.today-line {
+  stroke: var(--color-today);
+  stroke-width: var(--today-stroke-width);
+  stroke-dasharray: 6, 4;
+}
+
+.today-label {
+  font-family: var(--font-family);
+  font-size: 10px;
+  fill: var(--color-today);
+}
+
+/* ============================================================
+   Milestone Lines
+   ============================================================ */
+
+.milestone-line {
+  stroke: var(--color-milestone);
+  stroke-width: var(--milestone-stroke-width);
+  stroke-dasharray: 4, 3;
+}
+
+.milestone-line.freeze {
+  stroke: var(--color-milestone-freeze);
+}
+
+.milestone-line.release {
+  stroke: var(--color-milestone-release);
+}
+
+.milestone-line.deadline {
+  stroke: var(--color-milestone-deadline);
+}
+
+.milestone-label {
+  font-family: var(--font-family);
+  font-size: 10px;
+  fill: var(--color-milestone);
+}
+
+.milestone-label.freeze {
+  fill: var(--color-milestone-freeze);
+}
+
+.milestone-label.release {
+  fill: var(--color-milestone-release);
+}
+
+.milestone-label.deadline {
+  fill: var(--color-milestone-deadline);
+}
+
+/* ============================================================
+   Legend
+   ============================================================ */
+
+.legend-text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-legend);
+  fill: #555555;
+}
+
+.legend-bar.plan { fill: var(--color-plan); }
+.legend-bar.completed { fill: var(--color-completed); }
+.legend-bar.on-track { fill: var(--color-on-track); }
+.legend-bar.moved-out { fill: var(--color-moved-out); }
+
+.legend-diamond.plan { fill: var(--color-plan-diamond); }
+.legend-diamond.completed { fill: var(--color-completed-diamond); }
+.legend-diamond.on-track { fill: var(--color-on-track-diamond); }
+.legend-diamond.moved-out { fill: var(--color-moved-out-diamond); }
+
+/* ============================================================
+   Program Milestones
+   ============================================================ */
+
+.program-milestone-label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-label);
+  font-weight: 500;
+  fill: #333333;
+}
+
+/* Program milestone bars use the same .bar and .diamond
+   classes as track items — status determines color. */
+
+/* ============================================================
+   Tooltips
+   ============================================================ */
+
+.tooltip-bg {
+  fill: #333333;
+  rx: 4px;
+  ry: 4px;
+  opacity: 0.95;
+}
+
+.tooltip-text {
+  font-family: var(--font-family);
+  font-size: 11px;
+  fill: #FFFFFF;
+}
+
+/* ============================================================
+   Export Button (HTML overlay, not in SVG)
+   ============================================================ */
+
+.export-btn {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: #666666;
+  background: #F5F5F5;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  background: #EEEEEE;
+  color: #333333;
+}
