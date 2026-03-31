@@ -477,9 +477,10 @@ function renderTrackBars(svg, trackLayout, schedule, layout, C, pass) {
               x: x1, y: barY, width: Math.max(px2 - x1, 2), height: barH,
               class: 'bar on-track',
             }));
-            // Only show diamond if progress has reached plan.end
-            if (today >= planEnd) {
-              svg.appendChild(makeDiamond(x2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
+            // Green diamond only if there are actual dates confirming completion
+            if (item.actual) {
+              const ax2 = dateToX(item.actual.end, start, end, chartLeft, chartRight);
+              svg.appendChild(makeDiamond(ax2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
             }
           }
         } else {
@@ -586,8 +587,9 @@ function renderProgramBar(svg, item, barY, schedule, layout, C) {
         x: x1, y: barY, width: Math.max(px2 - x1, 2), height: barH,
         class: 'bar on-track',
       }));
-      if (today >= planEnd) {
-        group.appendChild(makeDiamond(px2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
+      if (item.actual) {
+        const ax2 = dateToX(item.actual.end, start, end, chartLeft, chartRight);
+        group.appendChild(makeDiamond(ax2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
       }
     }
   }
