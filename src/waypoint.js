@@ -933,7 +933,10 @@ function isFileProtocol() {
 }
 
 async function fetchText(url) {
-  const resp = await fetch(url);
+  // Cache-bust to ensure fresh files when iterating
+  const separator = url.includes('?') ? '&' : '?';
+  const bustUrl = `${url}${separator}_t=${Date.now()}`;
+  const resp = await fetch(bustUrl);
   if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
   return resp.text();
 }
@@ -1001,6 +1004,54 @@ function getUrlParams() {
   };
 }
 
+// Current state — tracked so Refresh can re-load
+let _currentState = {
+  container: null,
+  dataUrl: null,
+  viewUrl: null,
+  dataObj: null,
+  viewObj: null,
+  mode: null, // 'http' | 'embedded' | 'file-picker'
+};
+
+function renderCurrent() {
+  const { container, dataObj, viewObj } = _currentState;
+  if (!container || !dataObj || !viewObj) return;
+  const schedule = buildSchedule(dataObj, viewObj);
+  const svg = render(schedule, container);
+
+  // Wire up export button
+  const exportBtn = document.getElementById('export-btn');
+  if (exportBtn) {
+    exportBtn.onclick = () => exportPNG(svg, schedule.title);
+  }
+  return svg;
+}
+
+async function refresh() {
+  const { container, mode, dataUrl, viewUrl } = _currentState;
+  if (mode === 'http' && dataUrl && viewUrl) {
+    try {
+      const { dataObj, viewObj } = await loadViaFetch(dataUrl, viewUrl);
+      const params = getUrlParams();
+      if (params.tracks) {
+        viewObj.tracks = params.tracks.split(',').map(s => s.trim());
+      }
+      _currentState.dataObj = dataObj;
+      _currentState.viewObj = viewObj;
+      renderCurrent();
+    } catch (e) {
+      console.error('Refresh failed:', e.message);
+    }
+  } else if (mode === 'embedded') {
+    const { dataObj, viewObj } = loadFromEmbedded();
+    _currentState.dataObj = dataObj;
+    _currentState.viewObj = viewObj;
+    renderCurrent();
+  }
+  // file-picker mode: user must re-select files (nothing to re-fetch)
+}
+
 export async function init(container, options = {}) {
   const params = getUrlParams();
   let dataObj, viewObj;
@@ -1008,10 +1059,13 @@ export async function init(container, options = {}) {
   const defaultData = options.defaultDataUrl || '../examples/atlas-data.yaml';
   const defaultView = options.defaultViewUrl || '../examples/atlas-board.yaml';
 
+  _currentState.container = container;
+
   if (isFileProtocol()) {
     // File mode: use embedded defaults
     try {
       ({ dataObj, viewObj } = loadFromEmbedded());
+      _currentState.mode = 'embedded';
     } catch (e) {
       showError(container, e.message);
       return;
@@ -1020,12 +1074,16 @@ export async function init(container, options = {}) {
     // HTTP mode: fetch files
     const dataUrl = params.data || defaultData;
     const viewUrl = params.view || defaultView;
+    _currentState.dataUrl = dataUrl;
+    _currentState.viewUrl = viewUrl;
     try {
       ({ dataObj, viewObj } = await loadViaFetch(dataUrl, viewUrl));
+      _currentState.mode = 'http';
     } catch (e) {
       // Fall back to embedded
       try {
         ({ dataObj, viewObj } = loadFromEmbedded());
+        _currentState.mode = 'embedded';
       } catch (e2) {
         showError(container, e.message);
         return;
@@ -1038,64 +1096,60 @@ export async function init(container, options = {}) {
     viewObj.tracks = params.tracks.split(',').map(s => s.trim());
   }
 
-  const schedule = buildSchedule(dataObj, viewObj);
-  const svg = render(schedule, container);
+  _currentState.dataObj = dataObj;
+  _currentState.viewObj = viewObj;
+  renderCurrent();
 
-  // Wire up export button
+  // Wire up export button (initial binding)
   const exportBtn = document.getElementById('export-btn');
   if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      exportPNG(svg, schedule.title);
-    });
+    const schedule = buildSchedule(dataObj, viewObj);
+    exportBtn.onclick = () => exportPNG(document.querySelector('.waypoint'), schedule.title);
+  }
+
+  // Wire up refresh button
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', refresh);
   }
 
   // Wire up file pickers
-  setupFilePickers(container, viewObj);
+  setupFilePickers(container);
 
   // Wire up drag and drop
   setupDragDrop(container);
 
-  return svg;
+  return document.querySelector('.waypoint');
 }
 
 // ============================================================
 // File pickers
 // ============================================================
 
-function setupFilePickers(container, currentViewObj) {
+function setupFilePickers(container) {
   const dataInput = document.getElementById('file-data');
   const viewInput = document.getElementById('file-view');
   const styleInput = document.getElementById('file-style');
 
-  let currentData = null;
-  let currentView = currentViewObj;
-
-  function rerender() {
-    if (!currentData) return;
-    const schedule = buildSchedule(currentData, currentView);
-    const svg = render(schedule, container);
-    const exportBtn = document.getElementById('export-btn');
-    if (exportBtn) {
-      // Re-wire export
-      exportBtn.onclick = () => exportPNG(svg, schedule.title);
-    }
-  }
-
   if (dataInput) {
     dataInput.addEventListener('change', (e) => {
       readFile(e.target.files[0], (text) => {
-        currentData = parseYAML(text);
-        rerender();
+        _currentState.dataObj = parseYAML(text);
+        _currentState.mode = 'file-picker';
+        renderCurrent();
       });
+      e.target.value = ''; // Reset so same file can be re-selected
     });
   }
 
   if (viewInput) {
     viewInput.addEventListener('change', (e) => {
       readFile(e.target.files[0], (text) => {
-        currentView = parseYAML(text);
-        rerender();
+        _currentState.viewObj = parseYAML(text);
+        _currentState.mode = 'file-picker';
+        renderCurrent();
       });
+      e.target.value = '';
     });
   }
 
@@ -1103,8 +1157,9 @@ function setupFilePickers(container, currentViewObj) {
     styleInput.addEventListener('change', (e) => {
       readFile(e.target.files[0], (text) => {
         injectStyle(text, 'waypoint-dynamic-style');
-        rerender();
+        renderCurrent();
       });
+      e.target.value = '';
     });
   }
 }
