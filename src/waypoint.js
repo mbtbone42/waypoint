@@ -881,7 +881,7 @@ function attachTooltipLines(element, lines, link) {
   let tooltipGroup = null;
 
   element.addEventListener('mouseenter', (e) => {
-    tooltipGroup = svgEl('g', { class: 'tooltip' });
+    tooltipGroup = svgEl('g', { class: 'tooltip', 'pointer-events': 'none' });
 
     const lineHeight = 16;
     const padding = 8;
