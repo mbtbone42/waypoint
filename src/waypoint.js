@@ -477,10 +477,10 @@ function renderTrackBars(svg, trackLayout, schedule, layout, C, pass) {
               x: x1, y: barY, width: Math.max(px2 - x1, 2), height: barH,
               class: 'bar on-track',
             }));
-            svg.appendChild(makeDiamond(
-              px2 >= dateToX(planEnd, start, end, chartLeft, chartRight) ? x2 : px2,
-              barCenterY, C.DIAMOND_SIZE, 'on-track'
-            ));
+            // Only show diamond if progress has reached plan.end
+            if (today >= planEnd) {
+              svg.appendChild(makeDiamond(x2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
+            }
           }
         } else {
           // moved-out: green part from start to actual end
@@ -586,7 +586,9 @@ function renderProgramBar(svg, item, barY, schedule, layout, C) {
         x: x1, y: barY, width: Math.max(px2 - x1, 2), height: barH,
         class: 'bar on-track',
       }));
-      group.appendChild(makeDiamond(px2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
+      if (today >= planEnd) {
+        group.appendChild(makeDiamond(px2, barCenterY, C.DIAMOND_SIZE, 'on-track'));
+      }
     }
   }
 
