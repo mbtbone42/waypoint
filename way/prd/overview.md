@@ -234,6 +234,7 @@ Program milestones are high-level, trackless milestone bars that represent progr
 | `actual.end` | date | no | Actual end date |
 | `moved_to` | date | no | New end date if moved out |
 | `notes` | string | no | Tooltip text shown on hover (e.g., phase objectives or context) |
+| `link` | string | no | URL opened on click (e.g., project page, wiki) |
 
 ### Item Schema Detail
 
@@ -249,6 +250,7 @@ Each item within a lane:
 | `actual.end` | date | no | Actual end date (for completed items) |
 | `moved_to` | date | no | New planned end date (for moved-out items; red bar extends from original plan.end to this date) |
 | `notes` | string | no | Tooltip or annotation text (v1: tooltip on hover) |
+| `link` | string | no | URL opened on click (e.g., Jira epic, GitHub issue) |
 
 ### Status Rendering Rules
 
@@ -265,6 +267,7 @@ Each item within a lane:
 |-------|------|----------|-------------|
 | `name` | string | yes | Display name shown in the track gutter |
 | `notes` | string | no | Tooltip text shown on hover (e.g., expanded name, scope description) |
+| `link` | string | no | URL opened on click (e.g., team page, wiki) |
 | `lanes` | array | yes | List of lanes within this track |
 
 ### Lane Behavior
@@ -281,6 +284,7 @@ Each item within a lane:
 | `label` | string | yes | Display name shown at the top of the chart |
 | `type` | string | no | CSS class for styling (e.g., `freeze`, `release`, `deadline`) |
 | `notes` | string | no | Tooltip text shown on hover (e.g., what the milestone means, deadlines) |
+| `link` | string | no | URL opened on click (e.g., release plan, launch checklist) |
 
 - Rendered as vertical dashed or solid lines spanning the full chart height
 - Label rendered above the header, centered on the line
@@ -360,6 +364,13 @@ All colors are defined in the style CSS file (see `atlas-style.css` for defaults
 - **Title**: Hovering the chart title shows the `description` from the view file (if any), providing project context
 - **Legend**: Hovering a legend entry shows a description of what that status means. Built-in defaults are provided; overridable via `legend_descriptions` in the view file
 - **Month headers**: Hovering a month header box shows a generated summary: items completing that month, items starting, milestones, and program milestone activity
+
+### Click
+
+- Any object with a `link` field in the data YAML becomes clickable. Clicking opens the URL in a new browser tab.
+- Objects without a `link` field do nothing on click.
+- Clickable objects show a pointer cursor on hover (same as tooltip behavior).
+- This enables future integration with project management tools (e.g., Jira epic URLs, GitHub issue links).
 
 ### PNG Export
 

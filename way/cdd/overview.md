@@ -122,15 +122,17 @@ export function render(schedule, container)      // → SVGElement; builds SVG f
   programMilestones: [
     { label: string, start: Date, end: Date, status: string,
       actual: { start: Date, end: Date } | null,
-      notes: string | null }
+      notes: string | null, link: string | null }
   ],
   milestones: [
-    { date: Date, label: string, type: string | null, notes: string | null }
+    { date: Date, label: string, type: string | null,
+      notes: string | null, link: string | null }
   ],
   tracks: [
     {
       name: string,
       notes: string | null,
+      link: string | null,
       lanes: [
         {
           name: string,
@@ -142,6 +144,7 @@ export function render(schedule, container)      // → SVGElement; builds SVG f
               actual: { start: Date, end: Date } | null,
               movedTo: Date | null,
               notes: string | null,
+              link: string | null,
             }
           ]
         }

@@ -67,6 +67,7 @@ tracks:
             actual:              # Optional. Real dates for completed work.
               start: 2026-01-01
               end: 2026-03-15
+            link: "https://jira.example.com/PROJ-42"  # Optional. Opens on click.
 ```
 
 ### Item Fields
@@ -81,6 +82,7 @@ tracks:
 | `actual.end` | No | Real end date (for completed items) |
 | `moved_to` | No | New end date (for moved-out items) |
 | `notes` | No | Tooltip text shown on hover |
+| `link` | No | URL opened on click (e.g., Jira epic, GitHub issue) |
 
 ### Status Values
 
@@ -99,6 +101,17 @@ All visual objects support an optional `notes` field. Notes appear in hover tool
 - **Items**: Why something slipped, what's blocking, or other context
 - **Program milestones**: Phase objectives or success criteria
 - **Milestones**: What the milestone means, deadlines, or actions required
+
+### Links (All Objects)
+
+All visual objects support an optional `link` field. When present, clicking the object opens the URL in a new browser tab. Use links for:
+
+- **Items**: Jira epic, GitHub issue, or pull request URL
+- **Tracks**: Team wiki page, project board
+- **Program milestones**: Project plan or executive brief
+- **Milestones**: Release plan, launch checklist, compliance document
+
+Objects without a `link` field do nothing on click.
 
 ### Milestone Types
 
@@ -295,6 +308,7 @@ If you are an AI agent generating Waypoint YAML, follow these rules:
 6. **`moved_to` is only for `moved-out` items.** It's the new end date the work slipped to.
 7. **Track names must be unique.** Lane names should be unique within a track.
 8. **Use `notes` for context on any object.** Items: `notes: "Blocked by vendor API migration"`. Tracks: `notes: "Cloud, CI/CD, monitoring"`. Milestones: `notes: "All features must be merged by EOD"`. Program milestones: `notes: "Core stability and partner onboarding"`.
+9. **Use `link` for external references.** If the item came from Jira, include `link: "https://jira.example.com/PROJ-42"`. Links work on items, tracks, milestones, and program milestones. The URL opens in a new tab on click.
 
 ### View File Rules
 
@@ -308,9 +322,9 @@ If you are an AI agent generating Waypoint YAML, follow these rules:
 When generating a data file from project management tools:
 
 ```
-Jira Epic       → Track
+Jira Epic       → Track (link → epic URL)
 Jira Component  → Lane
-Jira Issue      → Item
+Jira Issue      → Item (link → issue URL)
 Sprint dates    → plan.start / plan.end
 Resolution date → actual.end
 ```

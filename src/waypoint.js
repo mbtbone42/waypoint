@@ -111,16 +111,19 @@ export function buildSchedule(dataObj, viewObj) {
       actual: pm.actual ? { start: toDate(pm.actual.start), end: toDate(pm.actual.end) } : null,
       movedTo: pm.moved_to ? toDate(pm.moved_to) : null,
       notes: pm.notes || null,
+      link: pm.link || null,
     })),
     milestones: (dataObj.milestones || []).map(m => ({
       date: toDate(m.date),
       label: m.label,
       type: m.type || null,
       notes: m.notes || null,
+      link: m.link || null,
     })),
     tracks: filteredTracks.map(t => ({
       name: t.name,
       notes: t.notes || null,
+      link: t.link || null,
       lanes: (t.lanes || []).map(l => ({
         name: l.name,
         items: (l.items || []).map(item => ({
@@ -130,6 +133,7 @@ export function buildSchedule(dataObj, viewObj) {
           actual: item.actual ? { start: toDate(item.actual.start), end: toDate(item.actual.end) } : null,
           movedTo: item.moved_to ? toDate(item.moved_to) : null,
           notes: item.notes || null,
+          link: item.link || null,
         })),
       })),
     })),
@@ -511,7 +515,7 @@ function renderTrackChrome(svg, trackLayout, C) {
   hitArea.style.cursor = 'pointer';
   const tooltipLines = [track.name];
   if (track.notes) tooltipLines.push(track.notes);
-  attachTooltipLines(hitArea, tooltipLines);
+  attachTooltipLines(hitArea, tooltipLines, track.link);
   svg.appendChild(hitArea);
 }
 
@@ -701,7 +705,7 @@ function renderProgramBar(svg, item, barY, schedule, layout, C) {
     `Status: ${status}`,
   ];
   if (item.notes) lines.push(item.notes);
-  attachTooltipLines(hitArea, lines);
+  attachTooltipLines(hitArea, lines, item.link);
   group.appendChild(hitArea);
 
   svg.appendChild(group);
@@ -782,7 +786,7 @@ function renderMilestoneLines(svg, schedule, layout, C) {
     hitArea.style.cursor = 'pointer';
     const lines = [ms.label, formatDate(ms.date)];
     if (ms.notes) lines.push(ms.notes);
-    attachTooltipLines(hitArea, lines);
+    attachTooltipLines(hitArea, lines, ms.link);
     svg.appendChild(hitArea);
   }
 }
@@ -861,10 +865,19 @@ function attachTooltip(element, item) {
   if (item.notes) {
     lines.push(item.notes);
   }
-  attachTooltipLines(element, lines);
+  attachTooltipLines(element, lines, item.link);
 }
 
-function attachTooltipLines(element, lines) {
+function attachLink(element, link) {
+  if (!link) return;
+  element.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.open(link, '_blank', 'noopener');
+  });
+}
+
+function attachTooltipLines(element, lines, link) {
+  if (link) attachLink(element, link);
   let tooltipGroup = null;
 
   element.addEventListener('mouseenter', (e) => {
