@@ -2,6 +2,7 @@
 # Zooms into the Systems track only
 
 title: "Project Atlas — Systems Deep Dive"
+description: "Detailed view of backend services, data layer, and performance engineering."
 
 data: atlas-data.yaml
 style: atlas-style.css

@@ -112,6 +112,7 @@ export function render(schedule, container)      // → SVGElement; builds SVG f
 // Schedule — the merged model (from data + view)
 {
   title: string,
+  description: string | null,       // from view YAML; tooltip on title hover
   timeline: {
     start: Date,
     end: Date,
@@ -149,6 +150,12 @@ export function render(schedule, container)      // → SVGElement; builds SVG f
   ],
   showProgramMilestones: boolean,
   showLegend: boolean,
+  legendDescriptions: {            // defaults with optional view overrides
+    plan: string,
+    completed: string,
+    "on-track": string,
+    "moved-out": string,
+  },
 }
 ```
 
@@ -346,14 +353,26 @@ On hover, a tooltip `<g>` is shown near the hovered element with a rounded-rect 
 
 Tooltips are universal — every visual object supports them:
 
-| Object | Tooltip Content |
-|--------|----------------|
-| Item bar | Label, plan dates, actual dates, status, notes |
-| Track label | Track name, notes |
-| Program milestone | Label, date range, status, notes |
-| Milestone label | Label, exact date (YYYY-MM-DD), notes |
+| Object | Tooltip Content | Source |
+|--------|----------------|--------|
+| Item bar | Label, plan dates, actual dates, status, notes | Data YAML |
+| Track label | Track name, notes | Data YAML |
+| Program milestone | Label, date range, status, notes | Data YAML |
+| Milestone label | Label, exact date (YYYY-MM-DD), notes | Data YAML |
+| Today label | "Today", exact date | View YAML (timeline.today) |
+| Title | Title, description | View YAML |
+| Legend entry | Status name, description | Built-in defaults, overridable via view YAML `legend_descriptions` |
+| Month header | Generated summary: completions, starts, milestones | Generated from data |
 
-All objects use the `notes` field from the data YAML. Tooltips only render content that exists — if there's no notes field, that line is omitted. If an object has no hover-worthy content beyond its label, the tooltip is still useful for confirming the exact element under the cursor.
+Tooltips only render content that exists — if there's no notes field, that line is omitted.
+
+**Legend defaults** (overridable via `legend_descriptions` in view YAML):
+- Plan: "Scheduled work that has not yet started"
+- Completed: "Work that has been finished"
+- On Track: "Work in progress, proceeding as planned"
+- Moved Out: "Work that has slipped past its original target date"
+
+**Month header summaries** are generated at render time by scanning all items. For each month, the tooltip lists: items with `plan.end` in that month (due), items with `plan.start` in that month (starting), milestones in that month, and items completing (`actual.end`) in that month.
 
 ---
 

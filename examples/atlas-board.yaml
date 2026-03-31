@@ -2,6 +2,7 @@
 # Shows all tracks for executive overview
 
 title: "Project Atlas — Engineering Schedule"
+description: "Engineering timeline for Project Atlas, covering all workstreams from Alpha through GA launch."
 
 data: atlas-data.yaml
 style: atlas-style.css
@@ -9,7 +10,7 @@ style: atlas-style.css
 timeline:
   start: 2025-12-01
   end: 2027-01-31
-  today: 2026-03-27
+  today: 2026-03-31
   granularity: month
 
 tracks: all

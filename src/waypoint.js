@@ -101,6 +101,7 @@ export function buildSchedule(dataObj, viewObj) {
   // Build schedule model with dates converted
   return {
     title: viewObj.title || '',
+    description: viewObj.description || null,
     timeline: { start, end, today, granularity: tl.granularity || 'month' },
     programMilestones: (dataObj.program_milestones || []).map(pm => ({
       label: pm.label,
@@ -134,6 +135,12 @@ export function buildSchedule(dataObj, viewObj) {
     })),
     showProgramMilestones: viewObj.show_program_milestones !== false,
     showLegend: viewObj.show_legend !== false,
+    legendDescriptions: {
+      plan: (viewObj.legend_descriptions && viewObj.legend_descriptions.plan) || 'Scheduled work that has not yet started',
+      completed: (viewObj.legend_descriptions && viewObj.legend_descriptions.completed) || 'Work that has been finished',
+      'on-track': (viewObj.legend_descriptions && viewObj.legend_descriptions['on-track']) || 'Work in progress, proceeding as planned',
+      'moved-out': (viewObj.legend_descriptions && viewObj.legend_descriptions['moved-out']) || 'Work that has slipped past its original target date',
+    },
   };
 }
 
@@ -260,6 +267,17 @@ export function render(schedule, container) {
     });
     titleText.textContent = schedule.title;
     svg.appendChild(titleText);
+
+    if (schedule.description) {
+      const hitArea = svgEl('rect', {
+        x: C.GUTTER_WIDTH, y: 0,
+        width: schedule.title.length * 10 + 20, height: C.TITLE_HEIGHT,
+        fill: 'transparent', class: 'hit-area',
+      });
+      hitArea.style.cursor = 'pointer';
+      attachTooltipLines(hitArea, [schedule.title, schedule.description]);
+      svg.appendChild(hitArea);
+    }
   }
 
   // Grid lines (behind everything)
@@ -335,6 +353,59 @@ function renderGridLines(svg, schedule, layout, C) {
   }
 }
 
+function generateMonthSummary(schedule, year, month) {
+  const lines = [];
+  const inMonth = (d) => d && d.getFullYear() === year && d.getMonth() === month;
+
+  // Items completing this month (actual end)
+  const completed = [];
+  // Items due this month (plan end)
+  const due = [];
+  // Items starting this month (plan start)
+  const starting = [];
+
+  for (const track of schedule.tracks) {
+    for (const lane of track.lanes) {
+      for (const item of lane.items) {
+        if (item.actual && inMonth(item.actual.end)) {
+          completed.push(item.label);
+        }
+        if (inMonth(item.plan.end) && item.status !== 'completed') {
+          due.push(item.label);
+        }
+        if (inMonth(item.plan.start)) {
+          starting.push(item.label);
+        }
+      }
+    }
+  }
+
+  // Milestones this month
+  const milestones = schedule.milestones
+    .filter(m => inMonth(m.date))
+    .map(m => m.label);
+
+  // Program milestones active this month
+  const pmActivity = schedule.programMilestones
+    .filter(pm => {
+      if (inMonth(pm.start)) return true;
+      if (inMonth(pm.end)) return true;
+      return false;
+    })
+    .map(pm => {
+      if (inMonth(pm.start)) return `${pm.label} starts`;
+      return `${pm.label} ends`;
+    });
+
+  if (completed.length) lines.push(`Completed: ${completed.join(', ')}`);
+  if (due.length) lines.push(`Due: ${due.join(', ')}`);
+  if (starting.length) lines.push(`Starting: ${starting.join(', ')}`);
+  if (milestones.length) lines.push(`Milestones: ${milestones.join(', ')}`);
+  if (pmActivity.length) lines.push(pmActivity.join(', '));
+
+  return lines;
+}
+
 function renderHeader(svg, schedule, layout, C) {
   const { start, end } = schedule.timeline;
   const { chartLeft, chartRight, headerY } = layout;
@@ -378,6 +449,22 @@ function renderHeader(svg, schedule, layout, C) {
     });
     text.textContent = label;
     svg.appendChild(text);
+
+    // Month tooltip with generated summary
+    const summary = generateMonthSummary(schedule, monthStart.getFullYear(), monthStart.getMonth());
+    if (summary.length > 0) {
+      const cellX = Math.max(x1, chartLeft);
+      const cellW = Math.min(x2, chartRight) - cellX;
+      const hitArea = svgEl('rect', {
+        x: cellX, y: headerY,
+        width: cellW, height: headerHeight,
+        fill: 'transparent', class: 'hit-area',
+      });
+      hitArea.style.cursor = 'pointer';
+      const fullLabel = `${formatMonth(monthStart)} ${monthStart.getFullYear()}`;
+      attachTooltipLines(hitArea, [fullLabel, ...summary]);
+      svg.appendChild(hitArea);
+    }
 
     d.setMonth(d.getMonth() + 1);
   }
@@ -715,6 +802,8 @@ function renderLegend(svg, schedule, layout, C) {
   ];
 
   for (const item of items) {
+    const startX = x;
+
     // Label
     const labelEl = svgEl('text', {
       x: x, y: y + 4,
@@ -734,7 +823,22 @@ function renderLegend(svg, schedule, layout, C) {
 
     // Diamond
     svg.appendChild(makeDiamond(x + barW, y, C.DIAMOND_SIZE, item.status));
-    x += barW + C.DIAMOND_SIZE / 2 + gap;
+    x += barW + C.DIAMOND_SIZE / 2;
+
+    // Tooltip hit area over the entire legend entry
+    const desc = schedule.legendDescriptions[item.status] || schedule.legendDescriptions[item.status.replace(' ', '-')];
+    if (desc) {
+      const hitArea = svgEl('rect', {
+        x: startX, y: y - C.DIAMOND_SIZE,
+        width: x - startX, height: C.DIAMOND_SIZE * 2,
+        fill: 'transparent', class: 'hit-area',
+      });
+      hitArea.style.cursor = 'pointer';
+      attachTooltipLines(hitArea, [item.label, desc]);
+      svg.appendChild(hitArea);
+    }
+
+    x += gap;
   }
 }
 

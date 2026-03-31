@@ -144,6 +144,7 @@ The view file controls what to show and how to frame it. It references a data fi
 # my-board-view.yaml
 
 title: "Project Atlas — Engineering Schedule"
+description: "Engineering timeline covering all workstreams from Alpha through GA."
 
 data: atlas-data.yaml        # Path to data file (relative to this file)
 style: atlas-style.css       # Path to style file (relative to this file)
@@ -151,7 +152,7 @@ style: atlas-style.css       # Path to style file (relative to this file)
 timeline:
   start: 2025-12-01          # Left edge of the timeline
   end: 2027-01-31            # Right edge of the timeline
-  today: 2026-03-27          # Optional. Defaults to system date.
+  today: 2026-03-31          # Optional. Defaults to system date.
   granularity: month          # Only "month" supported in v1.
 
 tracks: all                   # Show all tracks. Or a list:
@@ -161,6 +162,12 @@ tracks: all                   # Show all tracks. Or a list:
 
 show_program_milestones: true # Default: true
 show_legend: true             # Default: true
+
+# legend_descriptions:        # Optional. Override default legend tooltip text.
+#   plan: "Scheduled work that has not yet started"
+#   completed: "Work that has been finished"
+#   on-track: "Work in progress, proceeding as planned"
+#   moved-out: "Work that has slipped past its original target date"
 ```
 
 ### View Fields
@@ -168,6 +175,7 @@ show_legend: true             # Default: true
 | Field | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `title` | No | (none) | Chart title, top-left |
+| `description` | No | (none) | Project description, shown on title hover |
 | `data` | No | (default example) | Path to data YAML file |
 | `style` | No | (built-in defaults) | Path to style CSS file |
 | `timeline.start` | No | Earliest date in data | Left edge |
@@ -176,6 +184,7 @@ show_legend: true             # Default: true
 | `tracks` | No | `all` | `all` or a list of track names |
 | `show_program_milestones` | No | `true` | Show/hide program milestone row |
 | `show_legend` | No | `true` | Show/hide legend at bottom |
+| `legend_descriptions` | No | (built-in defaults) | Map of status to tooltip text for legend entries |
 
 ### Multiple Views from One Data File
 

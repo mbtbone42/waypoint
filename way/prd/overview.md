@@ -177,6 +177,7 @@ tracks:
 # view-board.yaml — presentation configuration for board meetings
 
 title: "Project Atlas — Engineering Schedule"
+description: "Engineering timeline for Project Atlas, covering all workstreams from Alpha through GA."
 
 data: atlas-data.yaml          # which data file to load
 style: atlas-style.css         # which style file to load (optional; defaults apply)
@@ -195,6 +196,12 @@ tracks: all                     # default; or a list of track names to include:
 show_program_milestones: true   # default true; set false to hide
 
 show_legend: true               # default true
+
+# legend_descriptions:          # optional; override default legend tooltip text
+#   plan: "Work that is scheduled but not yet started"
+#   completed: "Work that has been finished and verified"
+#   on-track: "Work currently in progress, proceeding as planned"
+#   moved-out: "Work that has slipped past its original target date"
 ```
 
 Multiple view files can reference the same data file:
@@ -248,7 +255,7 @@ Each item within a lane:
 | Status | Bar Color | Diamond Color | Behavior |
 |--------|-----------|---------------|----------|
 | `planned` | Gray (#CCCCCC) | Gray | Full plan bar rendered |
-| `on-track` | Green (#2E8B2E) overlaid on gray | Green | Green bar from plan.start to today (or actual progress), gray continues to plan.end |
+| `on-track` | Green (#2E8B2E) overlaid on gray | Green (only if `actual` dates exist) | Green bar from plan.start to today, no diamond (bar ends cleanly at today). Diamond only appears if `actual` dates confirm a completed endpoint. |
 | `completed` | Black (#222222) overlaid on gray | Black | Black bar from actual.start to actual.end. If no actual dates, uses plan dates |
 | `moved-out` | Green then Red (#CC0000) overlaid on gray | Red | Green bar up to original plan.end, red bar from plan.end to moved_to, then gray to new plan.end |
 
@@ -349,6 +356,10 @@ All colors are defined in the style CSS file (see `atlas-style.css` for defaults
 - **Tracks**: Hovering a track label shows the track name and notes (if any), providing expanded context for abbreviated names
 - **Program milestones**: Hovering a program milestone bar shows the label, date range, status, and notes (if any)
 - **Milestones**: Hovering a milestone label shows the label, exact date, and notes (if any)
+- **Today**: Hovering the Today label shows the exact date
+- **Title**: Hovering the chart title shows the `description` from the view file (if any), providing project context
+- **Legend**: Hovering a legend entry shows a description of what that status means. Built-in defaults are provided; overridable via `legend_descriptions` in the view file
+- **Month headers**: Hovering a month header box shows a generated summary: items completing that month, items starting, milestones, and program milestone activity
 
 ### PNG Export
 
